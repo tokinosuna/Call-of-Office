@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Call of Office</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+              :root {
+            --color-dark-blue: #1B3C53;
+            --color-mid-blue: #456882;
+            --color-beige-brown: #D2C1B6;
+            --color-beige-white: #F9F3EF;
+            
+            --color-work: #E8A838; /* Orange */
+            --color-hp: #5C946E; /* Green */
+            --color-san: #60B2D3; /* Light Blue */
+            --color-stress: #C74242; /* Red */
+            --color-gameover-bg: #220033; /* Dark Purple */
+
+            --font-pixel: 'Press Start 2P', cursive;
+            --font-chinese: 'Noto Sans SC', sans-serif;
+        }
+
+        @keyframes screen-glitch {
+            0% { transform: translate(0, 0); opacity: 1; }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(2px, -2px); }
+            60% { transform: translate(-2px, -2px); }
+            80% { transform: translate(2px, 2px); }
+            100% { transform: translate(0, 0); opacity: 0.98; }
+        }
+        
+        .low-sanity {
+            animation: screen-glitch 0.2s infinite;
+        }
+
+        body {
+            background-color: var(--color-beige-white);
+            font-family: var(--font-pixel);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: var(--color-dark-blue);
+            overflow: auto; 
+        }
+
+        #game-container {
+            width: 850px;
+            max-width: 100%;
+            height: 650px;
+            max-height: 95vh;
+            min-height: 500px;
+            background-color: var(--color-beige-brown);
+            border: 4px solid var(--color-dark-blue);
+            box-shadow: 8px 8px 0 var(--color-mid-blue);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: all 0.2s;
+            box-sizing: border-box;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            margin: 0 0 10px 0;
+            line-height: 1.2;
+        }
+
+        #lang-btn {
+            font-family: var(--font-chinese);
+            font-weight: 700;
+            font-size: 16px;
+            padding: 8px 12px;
+            border: 2px solid var(--color-dark-blue);
+            background-color: var(--color-beige-brown);
+            cursor: pointer;
+        }
+
+        .divider {
+            border-top: 2px dashed var(--color-dark-blue);
+            margin: 10px 0;
+            flex-shrink: 0;
+        }
+
+        #main-content {
+            display: flex;
+            flex-grow: 1;
+            gap: 20px;
+            margin-top: 10px;
+            min-height: 0;
+        }
+
+        #character-panel {
+            flex: 1;
+            border: 2px solid var(--color-dark-blue);
+            background-color: var(--color-beige-white);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            font-size: 24px;
+            user-select: none;
+            position: relative;
+        }
+        
+        #character-face {
+            font-size: 32px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            text-align: center;
+            line-height: 1.5;
+            white-space: pre; 
+        }
+        
+        #status-text {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 10px;
+            color: var(--color-stress);
+            opacity: 0;
+            transition: opacity 1s;
+        }
+
+        #stats-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .stat-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .stat-group label {
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 24px;
+            border: 2px solid var(--color-dark-blue);
+            background-color: white;
+            padding: 2px;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            transition: width 0.2s ease-in-out;
+        }
+
+        #work-bar { background-color: var(--color-work); }
+        #hp-bar { background-color: var(--color-hp); }
+        #san-bar { background-color: var(--color-san); }
+        #stress-bar { background-color: var(--color-stress); }
+
+        .game-data {
+            font-size: 14px;
+        }
+        
+        #button-panel {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+            flex-shrink: 0;
+        }
+
+        .game-btn {
+            flex: 1;
+            padding: 15px;
+            font-family: var(--font-pixel);
+            font-size: 20px;
+            background-color: var(--color-dark-blue);
+            color: var(--color-beige-white);
+            border: 2px solid var(--color-dark-blue);
+            box-shadow: 4px 4px 0 var(--color-mid-blue);
+            cursor: pointer;
+            transition: all 0.1s ease;
+            text-align: center;
+        }
+
+        .game-btn:active {
+            transform: translate(4px, 4px);
+            box-shadow: none;
+        }
+        .game-btn:disabled {
+            background-color: var(--color-mid-blue);
+            box-shadow: 4px 4px 0 var(--color-dark-blue);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(27, 60, 83, 0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        
+        .modal-content {
+            background-color: var(--color-beige-brown);
+            border: 4px solid var(--color-dark-blue);
+            padding: 30px;
+            text-align: center;
+            width: 70%;
+            box-shadow: 8px 8px 0 var(--color-dark-blue);
+            box-sizing: border-box;
+        }
+        
+        .modal-content h2 { font-size: 24px; margin-top: 0; }
+        .modal-content p { font-size: 16px; line-height: 1.4; }
+        .modal-content .description { font-size: 12px; color: var(--color-mid-blue); font-style: italic; }
+
+        #event-choices { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
+        
+        .choice-btn {
+            padding: 12px;
+            font-family: var(--font-pixel);
+            font-size: 14px;
+            cursor: pointer;
+            border: 2px solid var(--color-dark-blue);
+            background: var(--color-beige-white);
+            text-align: left;
+        }
+        .choice-btn:hover { background: var(--color-beige-brown); }
+
+        #game-over-modal .modal-content { 
+            background-color: var(--color-gameover-bg); 
+            color: white; 
+            border-color: var(--color-dark-blue);
+            box-shadow: 8px 8px 0 black;
+        }
+        
+        #game-over-title { 
+            font-size: 60px; 
+            color: var(--color-stress);
+            margin-bottom: 10px;
+            text-shadow: 4px 4px 0 black;
+        }
+        #death-reason { font-size: 20px; margin: 20px 0; color: #dddddd; }
+        #death-description { font-size: 14px; font-family: var(--font-chinese); color: #aaa; margin-bottom: 20px; }
+        #severance-earned { font-family: var(--font-pixel); margin-bottom: 30px; }
+
+        #menu-modal .modal-content, #death-log-modal .modal-content { text-align: left; width: 650px; max-height: 80%; overflow-y: auto; }
+        
+        .upgrade-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px dashed var(--color-mid-blue); padding-bottom: 10px; }
+        .upgrade-item p { margin: 0; font-size: 12px; }
+        .upgrade-item h4 { margin: 0 0 5px 0; font-size: 14px; }
+        .upgrade-purchased { color: var(--color-hp); font-weight: bold; }
+        
+        #death-log-list { list-style-type: none; padding: 0; }
+        #death-log-list li { font-size: 14px; padding: 10px; border-bottom: 1px solid var(--color-mid-blue); }
+        #death-log-list li:last-child { border-bottom: none; }
+        #death-log-list .death-title { font-weight: bold; }
+        #death-log-list .death-desc { font-size: 12px; font-family: var(--font-chinese); color: var(--color-mid-blue); padding-left: 10px; }
+
+        /* --- CUSTOM UI STYLES --- */
+        ::selection {
+            background-color: var(--color-dark-blue);
+            color: var(--color-beige-white);
+        }
+        ::-webkit-scrollbar {
+            width: 12px;
+            background-color: var(--color-mid-blue);
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: var(--color-dark-blue);
+            border: 2px solid var(--color-mid-blue);
+        }
+        ::-webkit-scrollbar-corner {
+            background: transparent;
+        }
+
+        /* --- RESPONSIVE STYLES --- */
+        @media (max-width: 900px) {
+            body {
+                height: auto;
+                padding: 20px;
+                min-height: 100vh;
+            }
+
+            #game-container {
+                width: 100%; 
+                height: auto; 
+                min-height: 0;
+                max-height: none;
+                padding: 15px;
+                box-shadow: 6px 6px 0 var(--color-mid-blue);
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .game-btn {
+                font-size: 18px;
+                padding: 12px;
+            }
+            
+            .modal-content {
+                width: 85%;
+                max-height: 80vh;
+                overflow-y: auto;
+            }
+
+            #game-over-title {
+                font-size: 50px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 10px 10px 90px 10px;
+            }
+            
+            #game-container {
+                padding: 10px;
+                box-shadow: 4px 4px 0 var(--color-mid-blue);
+            }
+
+            .header h1 {
+                font-size: 14px;
+            }
+            
+            #main-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            #character-face {
+                font-size: 28px;
+            }
+            
+            #button-panel {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                z-index: 10;
+                flex-direction: row;
+                gap: 10px;
+                padding: 10px;
+                margin: 0;
+                background-color: var(--color-beige-brown);
+                border-top: 4px solid var(--color-dark-blue);
+                box-sizing: border-box;
+            }
+
+            .game-btn {
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            #work-btn {
+                order: 3;
+                flex-grow: 2;
+            }
+            #pause-btn {
+                order: 1;
+                flex-grow: 1;
+            }
+            #menu-btn {
+                order: 2;
+                flex-grow: 1;
+            }
+
+            .modal-content {
+                width: 90%;
+                padding: 20px 15px;
+            }
+
+            .modal-content h2 { font-size: 18px; }
+            .modal-content p { font-size: 14px; }
+            .choice-btn { font-size: 12px; }
+            #game-over-title { font-size: 36px; }
+            #death-reason { font-size: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div class="header"><h1>Call of Office<br><em style="font-size: 12px;">The Salaryman's Untimely Demise Simulator</em></h1></div>
+        <div class="divider"></div>
+        <div id="main-content">
+            <div id="character-panel">
+                <div id="status-text"></div>
+                <div id="character-face">(´｡• ᵕ •｡)</div>
+                <div id="character-title">Fresh Meat</div>
+            </div>
+            <div id="stats-panel">
+                <div class="stat-group"><label>Work Progress (Daily Goal):</label><div class="progress-bar-container"><div id="work-bar" class="progress-bar"></div></div></div>
+                <div class="stat-group"><label>HP:</label><div class="progress-bar-container"><div id="hp-bar" class="progress-bar"></div></div></div>
+                <div class="stat-group"><label>SAN:</label><div class="progress-bar-container"><div id="san-bar" class="progress-bar"></div></div></div>
+                <div class="stat-group"><label>Stress Level:</label><div class="progress-bar-container"><div id="stress-bar" class="progress-bar"></div></div></div>
+                <div class="game-data"><p>Total Severance: <span id="total-severance">0</span></p><p>Days Survived: <span id="days-survived">0</span></p></div>
+            </div>
+        </div>
+        <div class="divider"></div>
+        <div id="button-panel">
+            <button id="work-btn" class="game-btn">WORK!</button>
+            <button id="pause-btn" class="game-btn">PAUSE</button>
+            <button id="menu-btn" class="game-btn">MENU</button>
+        </div>
+    </div>
+    
+    <div id="game-over-modal" class="modal"><div class="modal-content"><h2 id="game-over-title">GAME OVER</h2><p id="death-reason">You died.</p><p id="death-description">How it happened.</p><p id="severance-earned"></p><button id="restart-btn" class="game-btn">Begin Next Life</button></div></div>
+    <div id="event-modal" class="modal"><div class="modal-content"><h2 id="event-title">An Event Occurs!</h2><p id="event-description"></p><div id="event-choices"></div></div></div>
+    <div id="menu-modal" class="modal"><div class="modal-content"><h2 id="menu-title">MENU</h2><div id="menu-view-commissary"><h3>Afterlife Commissary</h3><p class="description">Spend your severance on permanent upgrades for your next miserable life.</p><div id="upgrades-list"></div></div><div id="menu-view-death-log" style="display: none;"><h3>猝死圖鑑 (Death Encyclopedia)</h3><p class="description">A monument to your many failures. Collect them all!</p><ul id="death-log-list"></ul></div><hr><button id="toggle-view-btn" class="game-btn">View Death Log</button><button id="close-menu-btn" class="game-btn">Close</button></div></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- GAME DATA ---
+            const DEATH_TYPES = {
+                WORK_PROGRESS_ZERO: { name: "#01 Starvation by Unemployment", description: "You didn't meet your daily work quota and were fired. Unable to find another job, you wasted away." },
+                PHYSICAL_COLLAPSE: { name: "#02 Physical Collapse", description: "Your HP reached zero. Your body finally gave out from the abuse. At least it was quick." },
+                MENTAL_BREAKDOWN: { name: "#03 Mental Breakdown", description: "Your SAN meter depleted. You were last seen laughing maniacally while trying to staple the quarterly reports to the ceiling." },
+                OVERWORK: { name: "#04 Death by Overwork", description: "Your stress level maxed out. Your heart exploded during a pointless meeting about synergy. A classic." },
+                RAGE_CLICK: { name: "#05 Carpal Tunnel Catastrophe", description: "You clicked 'WORK!' so fast and hard that your wrist ligaments snapped, leading to a fatal, ironic embolism." },
+                PAST_LIFE_TRAUMA: { name: "#05a Past Life Trauma", description: "The memory of your previous demise echoes in your tendons. Your wrist gives out from phantom pains, leading to a fatal spasm." },
+                FOOD_POISONING: { name: "#08 Pantry Roulette Fatality", description: "You ate the expired microwave burrito. It was a bad choice. A very, very bad choice." },
+                COFFEE_HEART_ATTACK: { name: "#09 Overcaffeinated Demise", description: "That 'quadruple espresso' from the new coffee machine was, in fact, pure, uncut caffeine. Your heart tried to beat its way out of your chest." },
+                STAPLER_ACCIDENT: { name: "#10 Unfortunate Office Supply Incident", description: "While trying to fix the jammed printer, you slipped on a rogue paperclip and were impaled by a dangerously positioned stapler. HR is calling it 'a learning opportunity'." },
+                SOCIAL_SUICIDE: { name: "#11 Career Suicide by Social Media", description: "You posted a complaint about work on social media. The boss saw it. You were not just fired; you were erased from the company photo." },
+                ERGONOMIC_FAILURE: { name: "#12 Death by Unsupportive Chair", description: "Your cheap office chair finally collapsed, causing a spinal injury that led to... complications. Should have filled out that ergonomics request form." },
+                MICROWAVE_WARFARE: { name: "#13 Microwave Warfare Casualty", description: "You microwaved fish in the breakroom. An enraged coworker, driven mad by the smell, ended your reign of terror with a keyboard." },
+                DEATH_BY_TECHNORAGE: { name: "#14 Death by Technorage", description: "You smashed your slow computer in a fit of rage. A capacitor exploded, sending shrapnel into your carotid artery. IT will be billing your next of kin." },
+                REPLY_ALL_APOCALYPSE: { name: "#15 Reply-All Apocalypse", description: "You accidentally 'Replied All' to a company-wide email with a scathing remark about the CEO. The social fallout was so intense, you simply ceased to exist." },
+                WELLNESS_SEMINAR_BOREDOM: { name: "#16 Suffocation by Wellness", description: "You fell asleep during a mandatory wellness seminar. Unfortunately, you slumped forward and suffocated against the plush, non-ergonomic conference chair." },
+                PAPER_CUT_SEPSIS: { name: "#17 The Thousand-Cut Demise", description: "You got a paper cut from the new TPS reports. It seemed minor, but the cheap office paper was teeming with bacteria, leading to fatal sepsis." },
+                PHISHING_SCAM_FIRING: { name: "#18 Phished and Fired", description: "You clicked the phishing link and compromised the entire network. As IT cleaned up the mess, security escorted you out of the building permanently." },
+                VENDING_MACHINE_VENDETTA: { name: "#19 Vending Machine Vendetta", description: "The vending machine ate your dollar. In your rage, you shook it until it toppled over, crushing you. Your snack was never recovered." },
+            };
+            
+            const UPGRADES = {
+                titaniumLiver: { name: "Titanium Alloy Liver", description: "Reduces HP cost of working.", cost: 50, level: 0, maxLevel: 5, effect: 0.1 },
+                noiseCancellingHeadphones: { name: "Noise-Cancelling Headphones", description: "Increases passive SAN regeneration rate.", cost: 75, level: 0, maxLevel: 5, effect: 0.15 },
+                artOfSlacking: { name: "The Art of Slacking Off", description: "Increases passive Stress decay rate.", cost: 100, level: 0, maxLevel: 5, effect: 0.2 },
+                antiBaldnessShampoo: { name: "Anti-Baldness Shampoo", description: "[Cosmetic] Delays the inevitable evolution.", cost: 200, level: 0, maxLevel: 1 },
+                bossAffirmation: { name: "Boss's Affirmation", description: "[Useless] A cheap compliment appears at start.", cost: 500, level: 0, maxLevel: 1 },
+            };
+
+            // FEATURE ADDED: Expanded character progression with your suggestions.
+            const CHARACTER_TIERS = [
+                { days: 0,   title: "Fresh Meat",                  face: "(´｡• ᵕ •｡)", subtext: "hopeful" },
+                { days: 10,  title: "Veteran",              face: "(•_•)",      subtext: "tired" },
+                { days: 30,  title: "Balding Veteran",  face: "(－_－)",    subtext: "thinning",       isBald: true },
+                { days: 60,  title: "Supervisor",             face: "(¬_¬)",      subtext: "judging",        isBald: true },
+                { days: 100, title: "Boss",                   face: "(•`_´•)",    subtext: "demanding",      isBald: true },
+                { days: 200, title: "Chairman",             face: "(♛_♛)",      subtext: "ascended" },
+            ];
+            
+            const RANDOM_EVENTS = [
+                { title: "Jammed Printer", description: "The printer is jammed again, flashing an error code that doesn't exist in any manual.", choices: [ { text: "Percussive maintenance (kick it).", effect: (s, g) => { s.stress -= 15; if (Math.random() < 0.15) g('STAPLER_ACCIDENT'); else s.workProgress += 5; } }, { text: "Call IT and wait 45 minutes.", effect: (s, g) => { s.san -= 15; s.stress += 10; s.workProgress -= 10;} } ] },
+                { title: "URGENT DEADLINE!", description: "The boss just dropped a last-minute project on you, due 'yesterday'. His words, not yours.", choices: [ { text: "Work through the night.", effect: (s, g) => { completeDay(true); s.hp -= 40; s.san -= 30; s.stress += 25; } }, { text: "Delegate to the unpaid intern.", effect: (s, g) => { s.workProgress += 20; s.san -= 10; if (Math.random() < 0.2) s.stress += 20; } } ] },
+                { title: "The Food Truck", description: "A gourmet taco truck is parked outside, but only for an hour. The smell is divine.", choices: [ { text: "It's taco time!", effect: (s, g) => { s.hp += 20; s.san += 5; s.workProgress -= 15; } }, { text: "Stay and eat your sad desk salad.", effect: (s, g) => { s.stress += 10; s.san -= 10; } } ] },
+                { title: "Mandatory 'Fun'", description: "HR announces a mandatory team-building exercise involving trust falls and ice breakers.", choices: [ { text: "Participate with a fake smile.", effect: (s, g) => { s.san -= 20; s.stress += 15; } }, { text: "Fake a sudden illness.", effect: (s, g) => { s.workProgress -= 10; s.stress -= 5; } } ] },
+                { title: "The Office Smell", description: "A mysterious, pungent odor is wafting from the breakroom fridge. It smells of despair and forgotten dreams.", choices: [ { text: "Bravely investigate the source.", effect: (s, g) => { if (Math.random() < 0.2) g('FOOD_POISONING'); else { s.san += 10; s.stress -= 10; } } }, { text: "Seal the breakroom door with tape.", effect: (s, g) => { s.san -= 5; } } ] },
+                { title: "Corporate Jargon Overload", description: "In a meeting, your manager says 'We need to leverage our synergies to circle back on these low-hanging fruit'.", choices: [ { text: "Nod sagely as if you understand.", effect: (s, g) => { s.san -= 10; } }, { text: "Ask what that means in plain English.", effect: (s, g) => { s.stress += 25; s.san += 10; } } ] },
+                { title: "Birthday Card Duty", description: "A birthday card is being passed around for 'Brenda from Accounting', whom you've never met.", choices: [ { text: "Sign 'Happy Birthday!' and pass it on.", effect: (s, g) => { s.san -= 2; } }, { text: "Write a long, fictional memory you shared.", effect: (s, g) => { s.san += 5; s.stress -= 5; } } ] },
+                { title: "Phishing Attempt", description: "An email from 'TotallyNotAScam@Ceo.biz' promises a huge bonus if you click the link and enter your password.", choices: [ { text: "Click it! I deserve a bonus!", effect: (s, g) => { g('PHISHING_SCAM_FIRING'); } }, { text: "Report to IT.", effect: (s, g) => { s.workProgress += 5; s.san += 5; } } ] },
+                { title: "The Dangling Snack", description: "You see your favorite snack dangling tantalizingly in the vending machine, stuck.", choices: [ { text: "Shake the machine with primal rage.", effect: (s, g) => { if (Math.random() < 0.1) g('VENDING_MACHINE_VENDETTA'); else { s.hp += 15; s.stress -= 10; } } }, { text: "Sigh and walk away.", effect: (s, g) => { s.san -= 5; s.stress += 5; } } ] },
+                { title: "Elevator with the CEO", description: "The elevator doors open. It's just you and the company CEO.", choices: [ { text: "Stare at your shoes in silence.", effect: (s, g) => { s.stress += 10; } }, { text: "Comment on the weather.", effect: (s, g) => { s.san -= 5; } }, { text: "Pitch your revolutionary new idea.", effect: (s, g) => { if (Math.random() < 0.1) { s.workProgress = 100; s.san += 20; } else { s.san -= 20; s.stress += 20; } } } ] },
+                { title: "IT Ticket #8675309", description: "Your computer has frozen. The mouse cursor is a spinning wheel of doom.", choices: [ { text: "Reboot it and lose unsaved work.", effect: (s, g) => { s.workProgress -= 10; s.stress += 5; } }, { text: "Smash the monitor.", effect: (s, g) => { g('DEATH_BY_TECHNORAGE'); } } ] },
+                { title: "Reply-All Nightmare", description: "You've just typed a scathing message about your team lead, intended for your work friend.", choices: [ { text: "Double-check and send.", effect: (s, g) => { s.stress -= 5; } }, { text: "Hit send without looking.", effect: (s, g) => { if (Math.random() < 0.2) g('REPLY_ALL_APOCALYPSE'); else s.stress += 30; } } ] },
+                { title: "Office Thermostat War", description: "Someone has cranked the AC, turning the office into an arctic tundra. Your fingers are turning blue.", choices: [ { text: "Secretly turn it up.", effect: (s, g) => { s.hp += 5; s.stress -= 5; } }, { text: "Suffer in silence with a blanket.", effect: (s, g) => { s.hp -= 10; s.san -= 5; } } ] },
+                { title: "The Last Coffee", description: "You see the last cup of coffee in the pot. A coworker is heading for it from the other direction.", choices: [ { text: "Sprint for it.", effect: (s, g) => { s.workProgress += 5; s.stress -= 10; } }, { text: "Let them have it, graciously.", effect: (s, g) => { s.san += 5; s.stress += 5; } } ] },
+                { title: "Fire Drill", description: "The fire alarm blares. It's just a drill, but you have to evacuate.", choices: [ { text: "Use it as an excuse for a long break.", effect: (s, g) => { s.workProgress -= 10; s.stress -= 15; s.san += 5; } }, { text: "Grab your laptop and work outside.", effect: (s, g) => { s.stress += 10; s.san -= 10; } } ] },
+                { title: "Suspiciously Free Donuts", description: "There's a box of donuts in the breakroom with no note. They could be a gift, or they could be from that failed project team.", choices: [ { text: "Eat one. Sugar is sugar.", effect: (s, g) => { s.hp += 10; s.stress -= 5; if (Math.random() < 0.05) s.hp -= 30; } }, { text: "Avoid the potential trap.", effect: (s, g) => { s.san -= 5; } } ] },
+                { title: "A 'Quick' Question", description: "A coworker leans over your cubicle and says 'Got a quick question?' You know it's never quick.", choices: [ { text: "Help them for the next hour.", effect: (s, g) => { s.workProgress -= 20; s.stress += 10; } }, { text: "Pretend to be on an important call.", effect: (s, g) => { s.san -= 10; s.stress -= 5; } } ] },
+                { title: "Wellness Seminar", description: "HR has scheduled a mandatory seminar on 'Mindfulness in the Workplace'.", choices: [ { text: "Attend and try to find inner peace.", effect: (s, g) => { s.san -= 10; s.stress += 5; } }, { text: "Fall asleep in the back row.", effect: (s, g) => { if (Math.random() < 0.05) g('WELLNESS_SEMINAR_BOREDOM'); else { s.stress -= 10; s.san += 5; } } } ] },
+                { title: "The Office Plant", description: "The sad, dusty office plant on your desk is looking particularly wilted.", choices: [ { text: "Water it with your coffee.", effect: (s, g) => { if (Math.random() < 0.2) g('COFFEE_HEART_ATTACK'); else s.san += 5; } }, { text: "Whisper words of encouragement to it.", effect: (s, g) => { s.san += 10; s.stress -= 5; } } ] },
+                { title: "TPS Reports", description: "Your boss asks if you got the memo about the new cover sheets for the TPS reports.", choices: [ { text: "Frantically search for the memo.", effect: (s, g) => { s.workProgress -= 5; s.stress += 10; } }, { text: "Confidently lie and say 'Of course'.", effect: (s, g) => { s.san -= 5; if (Math.random() < 0.1) s.workProgress -= 20; } } ] },
+                { title: "Microwave Etiquette", description: "You brought leftover fish for lunch. The breakroom is crowded.", choices: [ { text: "Microwave it. I am a monster.", effect: (s, g) => { if (Math.random() < 0.15) g('MICROWAVE_WARFARE'); else { s.hp += 15; s.san -= 10; }} }, { text: "Eat your fish cold and sad.", effect: (s, g) => { s.hp -= 5; s.san -= 10; } } ] },
+                { title: "Software Update", description: "Your computer forces a mandatory update that will take 'approximately 30 minutes'.", choices: [ { text: "Stare blankly at the screen.", effect: (s, g) => { s.workProgress -= 10; s.san -= 5; } }, { text: "Try to cancel it.", effect: (s, g) => { s.stress += 15; if (Math.random() < 0.5) s.workProgress -= 20; } } ] },
+                { title: "Stolen Pen", description: "Your favorite pen, the one that writes perfectly, is missing from your desk.", choices: [ { text: "Launch a full-scale investigation.", effect: (s, g) => { s.workProgress -= 15; s.stress += 10; s.san -= 10; } }, { text: "Accept that nothing is sacred.", effect: (s, g) => { s.san -= 5; } } ] },
+                { title: "Ergonomics Check", description: "An HR rep is walking around, asking about ergonomic support. Your chair is a literal stool.", choices: [ { text: "Praise your 'minimalist' setup.", effect: (s, g) => { s.san -= 10; s.hp -= 5; } }, { text: "Beg for a new chair.", effect: (s, g) => { s.stress += 5; if (Math.random() < 0.05) g('ERGONOMIC_FAILURE'); } } ] },
+                { title: "Social Media Temptation", description: "Work is slow. The siren call of social media is strong.", choices: [ { text: "Just a quick five-minute peek.", effect: (s, g) => { s.workProgress -= 10; s.san += 5; s.stress -= 5; if (Math.random() < 0.05) g('SOCIAL_SUICIDE'); } }, { text: "Resist and stare at your spreadsheet.", effect: (s, g) => { s.san -= 10; s.workProgress += 5; } } ] },
+                { title: "Empty Water Cooler", description: "You go for a refreshing cup of water, but the cooler is empty.", choices: [ { text: "Attempt to replace the giant bottle.", effect: (s, g) => { s.hp -= 10; s.workProgress -= 5; if (Math.random() < 0.1) s.hp -= 20; } }, { text: "Walk away, parched.", effect: (s, g) => { s.hp -= 5; s.stress += 5; } } ] },
+                { title: "The Spreadsheet Formula", description: "A critical spreadsheet formula is broken, returning '#REF!' everywhere.", choices: [ { text: "Spend the day fixing it.", effect: (s, g) => { s.workProgress -= 10; s.san -= 15; s.stress += 15; } }, { text: "Delete the evidence and blame IT.", effect: (s, g) => { s.san -= 10; s.stress -= 5; } } ] },
+                { title: "Jargon Bingo", description: "You're playing buzzword bingo in a meeting. You only need 'Paradigm Shift' to win.", choices: [ { text: "Try to steer the conversation.", effect: (s, g) => { s.stress += 10; s.san -= 5; } }, { text: "Wait for fate to deliver.", effect: (s, g) => { s.san -= 2; } } ] },
+                { title: "Mysterious Package", description: "A package arrives addressed to your desk, but you didn't order anything.", choices: [ { text: "Open it cautiously.", effect: (s, g) => { if (Math.random() < 0.1) { s.san += 20; s.hp += 10; } else { s.stress += 10; } } }, { text: "Leave it for security to handle.", effect: (s, g) => { s.san -= 5; } } ] },
+                { title: "Existential Dread", description: "You stare at your monitor and suddenly realize you've been typing the same sentence for ten minutes.", choices: [ { text: "Lean into the void.", effect: (s, g) => { s.san -= 20; s.stress += 10; } }, { text: "Shake it off and get back to work.", effect: (s, g) => { s.san += 5; s.workProgress += 5; } } ] },
+                { title: "The Intern's 'Help'", description: "The new intern offers to 'optimize' your workflow. They look very enthusiastic.", choices: [ { text: "Let them. What could go wrong?", effect: (s, g) => { s.stress += 15; s.workProgress -= 25; s.san -= 10; } }, { text: "Politely decline and give them a busy task.", effect: (s, g) => { s.stress -= 5; s.workProgress += 5; } } ] },
+                { title: "Paper Cut", description: "You get a surprisingly deep paper cut from a fresh stack of paper.", choices: [ { text: "Walk it off. 'Tis but a scratch.", effect: (s, g) => { s.hp -= 2; if (Math.random() < 0.05) g('PAPER_CUT_SEPSIS'); } }, { text: "Make a big deal and find a band-aid.", effect: (s, g) => { s.workProgress -= 5; } } ] },
+                { title: "Coffee Spill", description: "You spill a massive cup of coffee all over your desk and keyboard.", choices: [ { text: "Attempt a frantic cleanup.", effect: (s, g) => { s.workProgress -= 10; s.stress += 10; } }, { text: "Declare the desk a biohazard.", effect: (s, g) => { s.san -= 5; } } ] },, // <-- Make sure you add a comma after the last existing event!
+
+{ 
+    title: "The Unbalanced Throne", 
+    description: "Your office chair has developed a dangerous wobble. Every movement is a gamble between productivity and a minor concussion.", 
+    choices: [ 
+        { text: "Submit a facilities ticket and wait 3-5 business weeks.", effect: (s, g) => { s.workProgress -= 5; s.stress += 5; } }, 
+        { text: "Embrace it. Turn your work into a balancing act.", effect: (s, g) => { s.san += 10; s.hp -= 5; } } 
+    ] 
+},
+{ 
+    title: "Password Purgatory", 
+    description: "A mandatory password update is required. It must be 16 characters, with a number, a symbol, a capital letter, and the current phase of the moon.", 
+    choices: [ 
+        { text: "Spend 20 minutes creating a masterpiece you'll forget tomorrow.", effect: (s, g) => { s.workProgress -= 15; s.san -= 15; s.stress += 10; } }, 
+        { text: "Just add '2' to your old password.", effect: (s, g) => { s.stress -= 10; if (Math.random() < 0.2) { s.stress += 30; s.san -= 10; } } } 
+    ] 
+},
+{ 
+    title: "Muted Misery", 
+    description: "On a company-wide call, someone is unmuted. You can clearly hear them ordering a complex pizza and arguing about pineapple.", 
+    choices: [ 
+        { text: "Savor the drama. This is premium content.", effect: (s, g) => { s.workProgress -= 10; s.san += 10; s.stress -= 5; } }, 
+        { text: "Anonymously spam 'MUTE YOUR MIC!!!' in the chat.", effect: (s, g) => { s.stress -= 10; s.san += 5; } } 
+    ] 
+},
+{ 
+    title: "Symphony of Irritation", 
+    description: "A phone, left on a nearby desk, is ringing with the most obnoxious ringtone imaginable. It's been looping for three full minutes.", 
+    choices: [ 
+        { text: "Bury the phone under a pile of binders.", effect: (s, g) => { s.san += 5; s.stress -= 10; } }, 
+        { text: "Suffer, letting the quiet rage build inside you.", effect: (s, g) => { s.stress += 15; s.san -= 10; } } 
+    ] 
+},
+{ 
+    title: "The Forbidden Mug", 
+    description: "A mug in the breakroom sink has been there for weeks. It appears to be cultivating a new, sentient form of life.", 
+    choices: [ 
+        { text: "Throw it directly in the trash. No questions asked.", effect: (s, g) => { s.san += 10; s.stress -= 5; } }, 
+        { text: "Leave an increasingly passive-aggressive note next to it.", effect: (s, g) => { s.workProgress -= 5; s.stress += 5; } } 
+    ] 
+},
+{ 
+    title: "Aggressive Motivation", 
+    description: "A new poster appears: 'You don't have to be crazy to work here... but it helps!' It features a cat in a tiny tie.", 
+    choices: [ 
+        { text: "Die a little inside.", effect: (s, g) => { s.san -= 15; } }, 
+        { text: "Draw a tiny mustache on the cat.", effect: (s, g) => { s.san += 10; s.stress -= 10; if (Math.random() < 0.1) { s.stress += 40; } } } 
+    ] 
+},
+{ 
+    title: "Phantom Scent", 
+    description: "You catch a whiff of freshly popped popcorn, but the breakroom is empty and the microwave is cold. The ghost of snacks past haunts you.", 
+    choices: [ 
+        { text: "Mourn the snack that never was.", effect: (s, g) => { s.san -= 5; s.stress += 5; } }, 
+        { text: "Launch an investigation. The truth is out there.", effect: (s, g) => { s.workProgress -= 10; s.stress += 10; } } 
+    ] 
+},
+{ 
+    title: "The Long Goodbye", 
+    description: "A coworker stops by your desk to announce they are leaving for the day. They are still talking to you twenty minutes later.", 
+    choices: [ 
+        { text: "Politely nod until they run out of energy.", effect: (s, g) => { s.workProgress -= 15; s.san -= 10; } }, 
+        { text: "Fake a system crash that requires your full attention.", effect: (s, g) => { s.stress -= 5; s.san -= 5; } } 
+    ] 
+},
+                { title: "Sudden Quiet", description: "The constant hum of the office suddenly stops. The silence is deafening and deeply unsettling.", choices: [ { text: "Enjoy the peace.", effect: (s, g) => { s.san += 10; s.stress -= 10; } }, { text: "Panic. This is how the horror movie starts.", effect: (s, g) => { s.stress += 15; s.san -= 5; } } ] }
+            ];
+            
+            // --- DOM Elements & Game State ---
+            const gameContainer = document.getElementById('game-container'), workBtn = document.getElementById('work-btn'), pauseBtn = document.getElementById('pause-btn'), menuBtn = document.getElementById('menu-btn'), restartBtn = document.getElementById('restart-btn'), closeMenuBtn = document.getElementById('close-menu-btn'), toggleViewBtn = document.getElementById('toggle-view-btn'), workBar = document.getElementById('work-bar'), hpBar = document.getElementById('hp-bar'), sanBar = document.getElementById('san-bar'), stressBar = document.getElementById('stress-bar'), totalSeveranceEl = document.getElementById('total-severance'), daysSurvivedEl = document.getElementById('days-survived'), characterFaceEl = document.getElementById('character-face'), characterTitleEl = document.getElementById('character-title'), statusTextEl = document.getElementById('status-text'), gameOverModal = document.getElementById('game-over-modal'), eventModal = document.getElementById('event-modal'), menuModal = document.getElementById('menu-modal'), menuTitle = document.getElementById('menu-title'), commissaryView = document.getElementById('menu-view-commissary'), deathLogView = document.getElementById('menu-view-death-log');
+            let gameState = {}, gameLoopInterval = null, dayEndTimer = null, eventTimeout = null, totalSeverance = 0, unlockedDeaths = new Set(), isModalOpen = false, isManuallyPaused = false, currentUpgrades = JSON.parse(JSON.stringify(UPGRADES)), workClickCount = 0, rageClickTimer = null;
+            
+            let pastLifeTraumaState = { rageClickDeathSequence: 0 };
+            let isImmuneToRageClick = false;
+
+            function updateUI() {
+                if (!gameState) return;
+                workBar.style.width = `${gameState.workProgress}%`;
+                hpBar.style.width = `${gameState.hp}%`;
+                sanBar.style.width = `${gameState.san}%`;
+                stressBar.style.width = `${gameState.stress}%`;
+                totalSeveranceEl.textContent = totalSeverance;
+                daysSurvivedEl.textContent = gameState.daysSurvived;
+
+                let currentTier = CHARACTER_TIERS[0];
+                const baldnessDelay = currentUpgrades.antiBaldnessShampoo.level > 0 ? 30 : 0;
+                for(const tier of CHARACTER_TIERS) {
+                    let requiredDays = tier.days;
+                    if (tier.isBald) {
+                        requiredDays += baldnessDelay;
+                    }
+                    if (gameState.daysSurvived >= requiredDays) {
+                        currentTier = tier;
+                    }
+                }
+                characterFaceEl.innerHTML = `${currentTier.face}<br><span style="font-size: 14px;">${currentTier.subtext}</span>`;
+                characterTitleEl.textContent = currentTier.title;
+
+                gameContainer.classList.toggle('low-sanity', gameState.san < 30);
+            }
+
+            function gameLoop() {
+                if (isManuallyPaused || isModalOpen) return;
+                const headphoneFactor = 1 + (currentUpgrades.noiseCancellingHeadphones.level * currentUpgrades.noiseCancellingHeadphones.effect);
+                const slackingFactor = 1 + (currentUpgrades.artOfSlacking.level * currentUpgrades.artOfSlacking.effect);
+                
+                gameState.hp += 0.2;
+                gameState.san += 0.3 * headphoneFactor;
+                gameState.stress -= 0.05 * slackingFactor;
+
+                gameState = { ...gameState, hp: Math.min(100, gameState.hp), san: Math.min(100, gameState.san), stress: Math.max(0, gameState.stress) };
+                checkDeathConditions();
+                updateUI();
+            }
+            
+            function completeDay(isBonus = false) {
+                gameState.daysSurvived++;
+                gameState.workProgress = 0;
+                if (!isBonus) {
+                    gameState.hp = Math.min(100, gameState.hp + 5);
+                    gameState.san = Math.min(100, gameState.san + 10);
+                    gameState.stress = Math.max(0, gameState.stress - 15);
+                }
+                updateUI();
+                resetDayEndTimer();
+            }
+
+            function resetDayEndTimer() {
+                clearTimeout(dayEndTimer);
+                dayEndTimer = setTimeout(() => {
+                    if (gameLoopInterval !== null && !isManuallyPaused && !isModalOpen && gameState.workProgress < 100) {
+                        gameOver('WORK_PROGRESS_ZERO');
+                    }
+                }, 20000);
+            }
+
+            function checkDeathConditions() {
+                if (gameLoopInterval === null) return;
+                if (gameState.hp <= 0) gameOver("PHYSICAL_COLLAPSE");
+                else if (gameState.san <= 0) gameOver("MENTAL_BREAKDOWN");
+                else if (gameState.stress >= 100) gameOver("OVERWORK");
+            }
+            
+            function clearAllTimers() { [gameLoopInterval, dayEndTimer, eventTimeout, rageClickTimer].forEach(t => t && (t.toString().includes("Timeout") ? clearTimeout(t) : clearInterval(t))); gameLoopInterval = null; rageClickTimer = null; eventTimeout = null; dayEndTimer = null; }
+
+            function gameOver(deathId) {
+                if (!DEATH_TYPES[deathId] || gameLoopInterval === null) return;
+                
+                const deathInfo = DEATH_TYPES[deathId];
+                clearAllTimers();
+                
+                if (deathId === 'RAGE_CLICK') {
+                    pastLifeTraumaState.rageClickDeathSequence = 1;
+                } else if (deathId === 'PAST_LIFE_TRAUMA') {
+                    pastLifeTraumaState.rageClickDeathSequence = 0;
+                } else {
+                    pastLifeTraumaState.rageClickDeathSequence = 0;
+                }
+
+                const isNewDiscovery = !unlockedDeaths.has(deathId);
+                unlockedDeaths.add(deathId);
+                const severanceEarned = gameState.daysSurvived * 10 + (isNewDiscovery ? 150 : 25);
+                totalSeverance += severanceEarned;
+                
+                document.getElementById('death-reason').textContent = deathInfo.name;
+                document.getElementById('death-description').textContent = deathInfo.description;
+                document.getElementById('severance-earned').textContent = `You earned ${severanceEarned} severance pay. ${isNewDiscovery ? '(New Discovery Bonus!)' : ''}`;
+                gameOverModal.style.display = 'flex';
+            }
+
+            function showStatusText(text, color = 'var(--color-stress)', duration = 4000) {
+                statusTextEl.textContent = text;
+                statusTextEl.style.color = color;
+                statusTextEl.style.opacity = '1';
+                setTimeout(() => { statusTextEl.style.opacity = '0'; }, duration - 500);
+            }
+
+            function startGame() {
+                gameState = { workProgress: 0, hp: 100, san: 100, stress: 0, daysSurvived: 0 };
+                isModalOpen = false;
+                isManuallyPaused = false;
+                isImmuneToRageClick = false;
+                workClickCount = 0; // Reset click count at start of life
+                pauseBtn.textContent = 'PAUSE';
+                workBtn.disabled = false;
+                gameOverModal.style.display = 'none';
+                
+                if (pastLifeTraumaState.rageClickDeathSequence === 1) {
+                    isImmuneToRageClick = true;
+                    showStatusText("My wrist arches... a familiar phantom pain.", 'var(--color-stress)', 5000);
+                    
+                    setTimeout(() => {
+                        isImmuneToRageClick = false;
+                        // BUG FIXED HERE: Reset the click counter after immunity wears off.
+                        workClickCount = 0; 
+                        if (gameLoopInterval !== null) { 
+                           showStatusText("The phantom pain subsides... I can click again.", 'var(--color-san)', 3000);
+                        }
+                    }, 5000); // 5 second immunity period
+                } else if (currentUpgrades.bossAffirmation.level > 0) {
+                    showStatusText("Boss: Good job!", 'var(--color-hp)');
+                }
+                
+                updateUI();
+                gameLoopInterval = setInterval(gameLoop, 100);
+                scheduleNextEvent();
+                completeDay();
+            }
+            
+            function scheduleNextEvent() {
+                clearTimeout(eventTimeout);
+                const nextEventTime = 2000 + Math.random() * 5000;
+                eventTimeout = setTimeout(() => {
+                    if (!isManuallyPaused && !isModalOpen && gameLoopInterval !== null) triggerRandomEvent();
+                    if (gameLoopInterval !== null && !isManuallyPaused) scheduleNextEvent();
+                }, nextEventTime);
+            }
+
+            function triggerRandomEvent() {
+                isModalOpen = true;
+                const event = RANDOM_EVENTS[Math.floor(Math.random() * RANDOM_EVENTS.length)];
+                document.getElementById('event-title').textContent = event.title;
+                document.getElementById('event-description').textContent = event.description;
+                const choicesContainer = document.getElementById('event-choices');
+                choicesContainer.innerHTML = '';
+                event.choices.forEach(choice => {
+                    const btn = document.createElement('button');
+                    btn.textContent = choice.text;
+                    btn.className = 'choice-btn';
+                    btn.onclick = () => {
+                        choice.effect(gameState, gameOver);
+                        eventModal.style.display = 'none';
+                        isModalOpen = false;
+                        if (gameState.workProgress >= 100) { completeDay(); }
+                        updateUI();
+                        checkDeathConditions();
+                    };
+                    choicesContainer.appendChild(btn);
+                });
+                eventModal.style.display = 'flex';
+            }
+
+            function togglePause() {
+                isManuallyPaused = !isManuallyPaused;
+                if (isManuallyPaused) {
+                    pauseBtn.textContent = 'RESUME';
+                    workBtn.disabled = true;
+                    clearTimeout(eventTimeout);
+                    clearTimeout(dayEndTimer);
+                } else {
+                    pauseBtn.textContent = 'PAUSE';
+                    workBtn.disabled = false;
+                    scheduleNextEvent();
+                    resetDayEndTimer();
+                }
+            }
+            
+            function populateUpgrades() { 
+                const list = document.getElementById('upgrades-list'); list.innerHTML = ''; 
+                for (const key in currentUpgrades) { const upg = currentUpgrades[key]; const item = document.createElement('div'); item.className = 'upgrade-item'; let statusHtml; if (upg.level >= upg.maxLevel) { statusHtml = `<span class="upgrade-purchased">MAXED OUT</span>`; } else { const cost = upg.cost * (upg.level + 1); statusHtml = `<button class="buy-btn game-btn" data-key="${key}" data-cost="${cost}" ${totalSeverance < cost ? 'disabled' : ''}>BUY (${cost})</button>`; } item.innerHTML = `<div><h4>${upg.name} (Lvl ${upg.level}/${upg.maxLevel})</h4><p class="description">${upg.description}</p></div>${statusHtml}`; list.appendChild(item); } 
+                document.querySelectorAll('.buy-btn').forEach(btn => { btn.addEventListener('click', (e) => { const key = e.target.dataset.key; const itemCost = parseInt(e.target.dataset.cost); if (totalSeverance >= itemCost) { totalSeverance -= itemCost; currentUpgrades[key].level++; totalSeveranceEl.textContent = totalSeverance; populateUpgrades(); } }); }); 
+            }
+            function populateDeathLog() { 
+                const list = document.getElementById('death-log-list'); list.innerHTML = ''; if (unlockedDeaths.size === 0) { list.innerHTML = '<li>No deaths recorded yet. Try harder to fail!</li>'; } else { const sortedDeaths = Array.from(unlockedDeaths).sort((a,b) => DEATH_TYPES[a].name.localeCompare(DEATH_TYPES[b].name)); for (const deathId of sortedDeaths) { const deathInfo = DEATH_TYPES[deathId]; const li = document.createElement('li'); li.innerHTML = `<div class="death-title">${deathInfo.name}</div><div class="death-desc">${deathInfo.description}</div>`; list.appendChild(li); } } 
+            }
+            
+            workBtn.addEventListener('click', () => {
+                if (isManuallyPaused || isModalOpen || gameLoopInterval === null) return;
+                const liverFactor = 1 - (currentUpgrades.titaniumLiver.level * currentUpgrades.titaniumLiver.effect);
+                gameState.workProgress += 8;
+                gameState.hp -= 2.5 * liverFactor;
+                gameState.san -= 2.0;
+                gameState.stress += 1.5;
+                if (gameState.workProgress >= 100) { completeDay(); }
+                
+                if (!isImmuneToRageClick) { 
+                    workClickCount++; 
+                    if (!rageClickTimer) { 
+                        rageClickTimer = setTimeout(() => { workClickCount = 0; rageClickTimer = null; }, 1500); 
+                    } 
+                    if (workClickCount >= 10) { 
+                        if (pastLifeTraumaState.rageClickDeathSequence === 1) {
+                            gameOver("PAST_LIFE_TRAUMA");
+                        } else {
+                            gameOver("RAGE_CLICK"); 
+                        }
+                    } 
+                }
+                
+                updateUI();
+                checkDeathConditions();
+            });
+
+            restartBtn.addEventListener('click', startGame);
+            pauseBtn.addEventListener('click', togglePause);
+            menuBtn.addEventListener('click', () => { isModalOpen = true; populateUpgrades(); menuModal.style.display = 'flex'; });
+            closeMenuBtn.addEventListener('click', () => { menuModal.style.display = 'none'; isModalOpen = false; });
+            toggleViewBtn.addEventListener('click', () => { const isShowingCommissary = commissaryView.style.display !== 'none'; if (isShowingCommissary) { commissaryView.style.display = 'none'; deathLogView.style.display = 'block'; menuTitle.textContent = "Death Encyclopedia"; toggleViewBtn.textContent = 'View Upgrades'; populateDeathLog(); } else { commissaryView.style.display = 'block'; deathLogView.style.display = 'none'; menuTitle.textContent = "MENU"; toggleViewBtn.textContent = 'View Death Log'; } });
+            
+            startGame();
+        });
+    </script>
+</body>
+</html>
